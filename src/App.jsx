@@ -5,23 +5,40 @@ import useWeb3Forms from "@web3forms/react";
 
 function App() {
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    message: "",
+    name: '',
+    email: '',
+    phone: '',
+    message: '',
   });
 
   const { submit: submitForm } = useWeb3Forms({
     access_key: import.meta.env.VITE_WEB3FORMS_KEY,
     settings: {
-      from_name: "Goodwill Traders Website",
-      subject: "New Contact Form Submission",
+      from_name: 'Goodwill Traders Website',
+      subject: 'New Contact Form Submission',
     },
+    onError: (error) => {
+      console.error("Form submission error:", error);
+      toast.error('Failed to send message. Please try again.');
+    }
   });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    
+    // Basic validation
+    if (!formData.name || !formData.email || !formData.phone || !formData.message) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+    
     try {
       const result = await submitForm({
         name: formData.name,
@@ -30,14 +47,23 @@ function App() {
         message: formData.message,
       });
 
-      if (result.success) {
-        toast.success("Message sent successfully!");
-        setFormData({ name: "", email: "", phone: "", message: "" });
+      // Log the entire result object to see what's being returned
+      console.log("Form submission result:", result);
+
+      // Check if the form was actually submitted successfully
+      // Web3Forms might return different status indicators
+      if (result && (result.success === true || result.status === 'success')) {
+        toast.success('Message sent successfully!');
+        setFormData({ name: '', email: '', phone: '', message: '' });
       } else {
-        toast.error("Something went wrong. Please try again.");
+        // If we get here, the form was submitted but the response indicates failure
+        console.error("Form submission error:", result);
+        toast.error(result?.message || 'Something went wrong. Please try again.');
       }
     } catch (error) {
-      toast.error("Failed to send message. Please try again.");
+      // This catches network errors or exceptions during submission
+      console.error("Form submission exception:", error);
+      toast.error('Failed to send message. Please try again.');
     }
   };  const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -217,9 +243,8 @@ function App() {
       </footer>
     </div>
   );
-}
 
-function ServiceCard({ icon, title, description }) {
+}function ServiceCard({ icon, title, description }) {
   return (
     <div className="p-6 bg-gray-50 rounded-xl text-center hover:shadow-lg transition duration-300">
       <div className="flex justify-center mb-4">{icon}</div>
