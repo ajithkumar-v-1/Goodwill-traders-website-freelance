@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { Building2, Phone, Mail, Truck, Shield, Factory } from "lucide-react";
-import toast, { Toaster } from "react-hot-toast";
-import useWeb3Forms from "@web3forms/react";
-
+import { Toaster } from "react-hot-toast";
 function App() {
   const [formData, setFormData] = useState({
     name: '',
@@ -11,61 +9,7 @@ function App() {
     message: '',
   });
 
-  const { submit: submitForm } = useWeb3Forms({
-    access_key: import.meta.env.VITE_WEB3FORMS_KEY,
-    settings: {
-      from_name: 'Goodwill Traders Website',
-      subject: 'New Contact Form Submission',
-    },
-    onError: (error) => {
-      console.error("Form submission error:", error);
-      toast.error('Failed to send message. Please try again.');
-    }
-  });
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    // Basic validation
-    if (!formData.name || !formData.email || !formData.phone || !formData.message) {
-      toast.error('Please fill in all fields');
-      return;
-    }
-    
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      toast.error('Please enter a valid email address');
-      return;
-    }
-    
-    try {
-      const result = await submitForm({
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        message: formData.message,
-      });
-
-      // Log the entire result object to see what's being returned
-      console.log("Form submission result:", result);
-
-      // Check if the form was actually submitted successfully
-      // Web3Forms might return different status indicators
-      if (result && (result.success === true || result.status === 'success')) {
-        toast.success('Message sent successfully!');
-        setFormData({ name: '', email: '', phone: '', message: '' });
-      } else {
-        // If we get here, the form was submitted but the response indicates failure
-        console.error("Form submission error:", result);
-        toast.error(result?.message || 'Something went wrong. Please try again.');
-      }
-    } catch (error) {
-      // This catches network errors or exceptions during submission
-      console.error("Form submission exception:", error);
-      toast.error('Failed to send message. Please try again.');
-    }
-  };  const handleChange = (e) => {
+  const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -175,9 +119,31 @@ function App() {
             </div>
 
             <form
-              onSubmit={handleSubmit}
+              action="https://api.web3forms.com/submit"
+              method="POST"
               className="space-y-6 p-6 bg-white rounded-2xl shadow-sm"
             >
+              <input 
+                type="hidden" 
+                name="access_key" 
+                value={import.meta.env.VITE_WEB3FORMS_KEY} 
+              />
+              <input 
+                type="hidden" 
+                name="subject" 
+                value="New Contact Form Submission from Goodwill Traders Website" 
+              />
+              <input 
+                type="hidden" 
+                name="from_name" 
+                value="Goodwill Traders Website" 
+              />
+              <input 
+                type="checkbox" 
+                name="botcheck" 
+                className="hidden" 
+                style={{ display: 'none' }} 
+              />
               <div>
                 <input
                   type="text"
@@ -222,6 +188,11 @@ function App() {
                   required
                 ></textarea>
               </div>
+              <input 
+                type="hidden" 
+                name="redirect" 
+                value={window.location.href} 
+              />
               <button
                 type="submit"
                 className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-300 uppercase tracking-wider font-display text-sm"
@@ -243,8 +214,9 @@ function App() {
       </footer>
     </div>
   );
+}
 
-}function ServiceCard({ icon, title, description }) {
+function ServiceCard({ icon, title, description }) {
   return (
     <div className="p-6 bg-gray-50 rounded-xl text-center hover:shadow-lg transition duration-300">
       <div className="flex justify-center mb-4">{icon}</div>
