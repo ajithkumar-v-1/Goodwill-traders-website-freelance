@@ -208,7 +208,7 @@ function App() {
       <footer className="bg-gray-900 text-white py-8">
         <div className="container mx-auto px-4 text-center">
           <p className="text-sm tracking-wide font-display uppercase">
-            © 2024 Goodwill Traders. All rights reserved.
+            © 2025 Goodwill Traders. All rights reserved. 
           </p>
         </div>
       </footer>
